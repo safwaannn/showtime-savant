@@ -8,6 +8,9 @@ import Movies from "./pages/Movies";
 import Admin from "./pages/Admin";
 import SeatSelection from "./pages/SeatSelection";
 import NotFound from "./pages/NotFound";
+import Theaters from "@/components/ui/Theater";
+import SignIn from "./components/ui/signIn";
+import SignUp from "./components/ui/SignUp";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +23,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/movies" element={<Movies />} />
+          <Route path="/login" element={<SignIn />} />
+          <Route path="/register" element={<SignUp />} />
+          <Route path="/theaters" element={<Theaters />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/movie/:id/seats" element={<SeatSelection />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
