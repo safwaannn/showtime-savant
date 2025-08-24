@@ -1,42 +1,47 @@
-# Welcome to your Showtime-Savant project
+🎬 Showtime-Savant
+📌 Project Info
 
-## Project info
+Showtime-Savant is a full-stack movie ticket booking application where users can:
 
+Browse currently showing movies 🎥
 
+Filter by genres and search for specific titles 🔍
 
+View detailed movie information including ratings, duration, and language ⭐
 
-**Edit a file directly in GitHub**
+Select showtime and seats in an interactive seat layout 🪑
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Book tickets and receive a receipt 🎟
 
-**Use GitHub Codespaces**
+Download booking confirmation as a PDF 📥
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+This project aims to provide a realistic cinema booking experience with a clean, modern, and responsive UI.
 
-## What technologies are used for this project?
+🛠️ Technologies Used
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+⚡ Vite – For fast and optimized development
 
-## How can I deploy this project?
+⚛️ React + TypeScript – For building scalable UI with type safety
 
-Simply open [Lovable](https://lovable.dev/projects/a3872225-43b8-4de5-bd89-ed2bc035cf21) and click on Share -> Publish.
+🎨 Tailwind CSS – Utility-first styling
 
-## Can I connect a custom domain to my Lovable project?
+🧩 shadcn-ui – Reusable UI components with modern design
 
-Yes, you can!
+🎟 lucide-react – Icons for UI enhancement
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+🌐 Fake REST API (JSON Server) – For simulating movie and seat booking data
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+📑 jsPDF – For generating downloadable booking receipts
+
+🚀 Features
+
+✅ Movie Listings – Browse all movies with filters and search
+✅ Genre Filters – Quick filter by categories like Action, Drama, Comedy, etc.
+✅ Movie Details Page – Get all details including rating, duration, and showtime
+✅ Seat Selection – Interactive seat layout with pricing tiers and availability
+✅ Booking Summary – Selected seats, total price, and confirmation
+✅ Receipt Page – Beautiful receipt with movie & booking details
+✅ Download PDF – Export booking receipt as a PDF
+✅ Responsive Design – Works smoothly on mobile, tablet, and desktop
