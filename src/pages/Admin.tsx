@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,16 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import TheaterTable from "@/components/ui/TheaterTable";
-
-import {
-  Plus,
-  Edit,
-  Trash2,
-  Film,
-  MapPin,
-  Users,
-  TrendingUp,
-} from "lucide-react";
+import { Edit, Trash2, Film, MapPin, Users, TrendingUp } from "lucide-react";
 
 // ✅ Define props for TabButton
 interface TabButtonProps {
@@ -28,43 +19,63 @@ interface TabButtonProps {
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("movies");
 
-  // ✅ Theaters state
-  const [theaters, setTheaters] = useState([
-    {
-      id: 1,
-      name: "Cinepolis Pune",
-      location: "MG Road, Pune",
-      capacity: 250,
-      screens: 4,
-    },
-    {
-      id: 2,
-      name: "INOX Camp",
-      location: "Camp, Pune",
-      capacity: 180,
-      screens: 3,
-    },
-  ]);
+  // ✅ Load from localStorage or default values
+  const [theaters, setTheaters] = useState(() => {
+    const saved = localStorage.getItem("theaters");
+    return saved
+      ? JSON.parse(saved)
+      : [
+          {
+            id: 1,
+            name: "Cinepolis Pune",
+            location: "MG Road, Pune",
+            capacity: 250,
+            screens: 4,
+          },
+          {
+            id: 2,
+            name: "INOX Camp",
+            location: "Camp, Pune",
+            capacity: 180,
+            screens: 3,
+          },
+        ];
+  });
 
-  // ✅ Movies state
-  const [movies, setMovies] = useState([
-    {
-      id: 1,
-      title: "Avengers: Endgame",
-      genre: "Action, Adventure",
-      duration: "181 min",
-      rating: "PG-13",
-      status: "Now Showing",
-    },
-    {
-      id: 2,
-      title: "Spider-Man: No Way Home",
-      genre: "Action, Adventure",
-      duration: "148 min",
-      rating: "PG-13",
-      status: "Now Showing",
-    },
-  ]);
+  const [movies, setMovies] = useState(() => {
+    const saved = localStorage.getItem("movies");
+    return saved
+      ? JSON.parse(saved)
+      : [
+          {
+            id: 1,
+            title: "Avengers: Endgame",
+            genre: "Action, Adventure",
+            duration: "181 min",
+            rating: "PG-13",
+            status: "Now Showing",
+            theaterId: 1,
+          },
+          {
+            id: 2,
+            title: "Spider-Man: No Way Home",
+            genre: "Action, Adventure",
+            duration: "148 min",
+            rating: "PG-13",
+            status: "Now Showing",
+            theaterId: 2,
+          },
+        ];
+  });
+
+  // ✅ Sync to localStorage whenever state changes
+  useEffect(() => {
+    localStorage.setItem("movies", JSON.stringify(movies));
+  }, [movies]);
+
+  useEffect(() => {
+    localStorage.setItem("theaters", JSON.stringify(theaters));
+  }, [theaters]);
 
   // ✅ Movie Form state
   const [title, setTitle] = useState("");
@@ -73,6 +84,7 @@ const Admin = () => {
   const [rating, setRating] = useState("");
   const [language, setLanguage] = useState("");
   const [description, setDescription] = useState("");
+  const [theaterId, setTheaterId] = useState<number | "">(""); // ✅ NEW
 
   // ✅ Theater Form state
   const [tName, setTName] = useState("");
@@ -83,6 +95,11 @@ const Admin = () => {
   // ✅ Add Movie
   function handleAddMovie(e: React.FormEvent) {
     e.preventDefault();
+    if (!theaterId) {
+      alert("Please select a theater!");
+      return;
+    }
+
     const newMovie = {
       id: Date.now(),
       title,
@@ -90,14 +107,19 @@ const Admin = () => {
       duration: `${duration} min`,
       rating,
       status: "Coming Soon",
+      theaterId, // ✅ Link movie to theater
     };
+
     setMovies((prev) => [...prev, newMovie]);
+
+    // reset form
     setTitle("");
     setDuration("");
     setGenre("");
     setRating("");
     setLanguage("");
     setDescription("");
+    setTheaterId("");
   }
 
   // ✅ Delete Movie
@@ -236,37 +258,45 @@ const Admin = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {movies.map((movie) => (
-                    <div
-                      key={movie.id}
-                      className="flex items-center justify-between p-4 border border-border rounded-lg"
-                    >
-                      <div>
-                        <h3 className="font-semibold">{movie.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {movie.genre} • {movie.duration} • {movie.rating}
-                        </p>
-                        <Badge
-                          variant="default"
-                          className="mt-2 bg-accent text-accent-foreground"
-                        >
-                          {movie.status}
-                        </Badge>
+                  {movies.map((movie) => {
+                    const theater = theaters.find(
+                      (t) => t.id === movie.theaterId
+                    );
+                    return (
+                      <div
+                        key={movie.id}
+                        className="flex items-center justify-between p-4 border border-border rounded-lg"
+                      >
+                        <div>
+                          <h3 className="font-semibold">{movie.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {movie.genre} • {movie.duration} • {movie.rating}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            🎬 Theater: {theater?.name || "Unknown"}
+                          </p>
+                          <Badge
+                            variant="default"
+                            className="mt-2 bg-accent text-accent-foreground"
+                          >
+                            {movie.status}
+                          </Badge>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteMovie(movie.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteMovie(movie.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -336,6 +366,26 @@ const Admin = () => {
                         />
                       </div>
                     </div>
+
+                    {/* ✅ Theater dropdown */}
+                    <div>
+                      <Label htmlFor="theater">Assign to Theater</Label>
+                      <select
+                        id="theater"
+                        className="w-full border rounded-md p-2 mt-1"
+                        value={theaterId}
+                        onChange={(e) => setTheaterId(Number(e.target.value))}
+                        required
+                      >
+                        <option value="">-- Select Theater --</option>
+                        {theaters.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.name} ({t.location})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
                     <div className="flex space-x-4">
                       <Button
                         type="submit"
