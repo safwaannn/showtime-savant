@@ -67,18 +67,22 @@ const SeatLayout = () => {
     }
   };
 
-  // ✅ Navigate to receipt page with booking details
+  // ✅ Navigate to receipt page with booking details & save to localStorage
   const handleProceedToPayment = () => {
-    navigate("/receipt", {
-      state: {
-        movieTitle: "Avengers: Endgame",
-        theater: "PVR Cinemas - Mall of India",
-        showDate: "Today, Jan 15",
-        showTime: "7:30 PM",
-        seats: selectedSeats.map((seat) => seat.id),
-        totalPrice,
-      },
-    });
+    const bookingData = {
+      movieTitle: "Avengers: Endgame",
+      theater: "PVR Cinemas - Mall of India",
+      showDate: "Today, Jan 15",
+      showTime: "7:30 PM",
+      seats: selectedSeats.map((seat) => seat.id),
+      totalPrice,
+    };
+
+    // Save to localStorage
+    localStorage.setItem("bookingData", JSON.stringify(bookingData));
+
+    // Navigate to receipt page
+    navigate("/receipt", { state: bookingData });
   };
 
   return (

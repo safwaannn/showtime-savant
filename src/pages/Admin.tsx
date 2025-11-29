@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import TheaterTable from "@/components/ui/TheaterTable";
+import Showtimes from "@/components/ui/Showtime"; // ✅ Import Showtimes
 import { Edit, Trash2, Film, MapPin, Users, TrendingUp } from "lucide-react";
+import Bookings from "@/components/ui/Bookings";
 
-// ✅ Define props for TabButton
 interface TabButtonProps {
   id: string;
   label: string;
@@ -19,7 +20,7 @@ interface TabButtonProps {
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("movies");
 
-  // ✅ Load from localStorage or default values
+  // ✅ Theater state
   const [theaters, setTheaters] = useState(() => {
     const saved = localStorage.getItem("theaters");
     return saved
@@ -42,6 +43,7 @@ const Admin = () => {
         ];
   });
 
+  // ✅ Movie state
   const [movies, setMovies] = useState(() => {
     const saved = localStorage.getItem("movies");
     return saved
@@ -55,6 +57,7 @@ const Admin = () => {
             rating: "PG-13",
             status: "Now Showing",
             theaterId: 1,
+            image: "",
           },
           {
             id: 2,
@@ -64,11 +67,18 @@ const Admin = () => {
             rating: "PG-13",
             status: "Now Showing",
             theaterId: 2,
+            image: "",
           },
         ];
   });
 
-  // ✅ Sync to localStorage whenever state changes
+  // ✅ Showtime state
+  const [showtimes, setShowtimes] = useState(() => {
+    const saved = localStorage.getItem("showtimes");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // ✅ Sync states with localStorage
   useEffect(() => {
     localStorage.setItem("movies", JSON.stringify(movies));
   }, [movies]);
@@ -77,6 +87,10 @@ const Admin = () => {
     localStorage.setItem("theaters", JSON.stringify(theaters));
   }, [theaters]);
 
+  useEffect(() => {
+    localStorage.setItem("showtimes", JSON.stringify(showtimes));
+  }, [showtimes]);
+
   // ✅ Movie Form state
   const [title, setTitle] = useState("");
   const [duration, setDuration] = useState("");
@@ -84,13 +98,24 @@ const Admin = () => {
   const [rating, setRating] = useState("");
   const [language, setLanguage] = useState("");
   const [description, setDescription] = useState("");
-  const [theaterId, setTheaterId] = useState<number | "">(""); // ✅ NEW
+  const [theaterId, setTheaterId] = useState<number | "">("");
+  const [image, setImage] = useState("");
 
   // ✅ Theater Form state
   const [tName, setTName] = useState("");
   const [tLocation, setTLocation] = useState("");
   const [tCapacity, setTCapacity] = useState("");
   const [tScreens, setTScreens] = useState("");
+
+  // ✅ Handle image upload
+  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setImage(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  }
 
   // ✅ Add Movie
   function handleAddMovie(e: React.FormEvent) {
@@ -99,7 +124,6 @@ const Admin = () => {
       alert("Please select a theater!");
       return;
     }
-
     const newMovie = {
       id: Date.now(),
       title,
@@ -107,12 +131,10 @@ const Admin = () => {
       duration: `${duration} min`,
       rating,
       status: "Coming Soon",
-      theaterId, // ✅ Link movie to theater
+      theaterId,
+      image,
     };
-
     setMovies((prev) => [...prev, newMovie]);
-
-    // reset form
     setTitle("");
     setDuration("");
     setGenre("");
@@ -120,6 +142,7 @@ const Admin = () => {
     setLanguage("");
     setDescription("");
     setTheaterId("");
+    setImage("");
   }
 
   // ✅ Delete Movie
@@ -149,6 +172,7 @@ const Admin = () => {
     setTheaters((prev) => prev.filter((t) => t.id !== id));
   }
 
+  // ✅ Dashboard Stats
   const stats = [
     {
       title: "Total Movies",
@@ -171,6 +195,7 @@ const Admin = () => {
     },
   ];
 
+  // ✅ Tab button
   const TabButton = ({ id, label, isActive, onClick }: TabButtonProps) => (
     <Button
       variant={isActive ? "default" : "outline"}
@@ -249,7 +274,7 @@ const Admin = () => {
           />
         </div>
 
-        {/* Movies Tab */}
+        {/* ✅ Movies Tab */}
         {activeTab === "movies" && (
           <>
             <Card>
@@ -267,20 +292,29 @@ const Admin = () => {
                         key={movie.id}
                         className="flex items-center justify-between p-4 border border-border rounded-lg"
                       >
-                        <div>
-                          <h3 className="font-semibold">{movie.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {movie.genre} • {movie.duration} • {movie.rating}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            🎬 Theater: {theater?.name || "Unknown"}
-                          </p>
-                          <Badge
-                            variant="default"
-                            className="mt-2 bg-accent text-accent-foreground"
-                          >
-                            {movie.status}
-                          </Badge>
+                        <div className="flex items-center space-x-4">
+                          {movie.image && (
+                            <img
+                              src={movie.image}
+                              alt={movie.title}
+                              className="w-16 h-20 object-cover rounded-md border"
+                            />
+                          )}
+                          <div>
+                            <h3 className="font-semibold">{movie.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {movie.genre} • {movie.duration} • {movie.rating}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              🎬 Theater: {theater?.name || "Unknown"}
+                            </p>
+                            <Badge
+                              variant="default"
+                              className="mt-2 bg-accent text-accent-foreground"
+                            >
+                              {movie.status}
+                            </Badge>
+                          </div>
                         </div>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm">
@@ -367,23 +401,47 @@ const Admin = () => {
                       </div>
                     </div>
 
-                    {/* ✅ Theater dropdown */}
+                    {/* Theater dropdown */}
                     <div>
                       <Label htmlFor="theater">Assign to Theater</Label>
                       <select
                         id="theater"
-                        className="w-full border rounded-md p-2 mt-1"
+                        className="w-full border rounded-md p-2 mt-1 bg-black"
                         value={theaterId}
                         onChange={(e) => setTheaterId(Number(e.target.value))}
                         required
                       >
-                        <option value="">-- Select Theater --</option>
+                        <option value="" className="bg-black text-stone-50">
+                          -- Select Theater --
+                        </option>
                         {theaters.map((t) => (
-                          <option key={t.id} value={t.id}>
+                          <option
+                            key={t.id}
+                            value={t.id}
+                            className="bg-black text-stone-50"
+                          >
                             {t.name} ({t.location})
                           </option>
                         ))}
                       </select>
+                    </div>
+
+                    {/* Movie Poster Upload */}
+                    <div>
+                      <Label htmlFor="image">Movie Poster</Label>
+                      <Input
+                        id="image"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                      />
+                      {image && (
+                        <img
+                          src={image}
+                          alt="Preview"
+                          className="mt-2 w-32 h-40 object-cover rounded-md border"
+                        />
+                      )}
                     </div>
 
                     <div className="flex space-x-4">
@@ -408,7 +466,7 @@ const Admin = () => {
           </>
         )}
 
-        {/* Theaters Tab */}
+        {/* ✅ Theaters Tab */}
         {activeTab === "theaters" && (
           <>
             <TheaterTable
@@ -416,7 +474,6 @@ const Admin = () => {
               onDelete={handleDeleteTheater}
               onEdit={(id) => console.log("Edit theater", id)}
             />
-
             {/* Add Theater Form */}
             <div className="mt-8">
               <Card>
@@ -488,6 +545,12 @@ const Admin = () => {
             </div>
           </>
         )}
+
+        {/* ✅ Showtimes Tab */}
+        {activeTab === "showtimes" && <Showtimes />}
+
+        {/* ✅ Bookings Tab */}
+        {activeTab === "bookings" && <Bookings />}
       </div>
     </div>
   );
